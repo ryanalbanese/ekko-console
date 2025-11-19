@@ -3,6 +3,9 @@ import { getCurrentToken } from './auth';
 import type {
   SendMessageRequestDto,
   SendMessageResponseDto,
+  WebhookEndpoint,
+  CreateWebhookEndpointRequest,
+  EkkoChannelsResponse,
 } from '../types/api';
 
 const API_URL = import.meta.env.VITE_EKKO_API_URL || 'http://localhost:8080';
@@ -79,6 +82,95 @@ export async function getMessageById(
   }
 
   const response = await apiClient.get(`/v1/message/${messageId}`);
+  return response.data;
+}
+
+/**
+ * Get message content by ID via GET /v1/message/{messageId}/content
+ */
+export async function getMessageContentById(
+  messageId: string
+): Promise<unknown> {
+  const token = getCurrentToken();
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  const response = await apiClient.get(`/v1/message/${messageId}/content`);
+  return response.data;
+}
+
+/**
+ * Get message channels via GET /v1/message/channels
+ */
+export async function getMessageChannels(): Promise<EkkoChannelsResponse> {
+  const token = getCurrentToken();
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  const response = await apiClient.get<EkkoChannelsResponse>('/v1/message/channels');
+  return response.data;
+}
+
+/**
+ * Get webhook endpoints via GET /v1/webhooks/endpoints
+ */
+export async function getWebhookEndpoints(): Promise<WebhookEndpoint[]> {
+  const token = getCurrentToken();
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  const response = await apiClient.get<WebhookEndpoint[]>('/v1/webhooks/endpoints');
+  return response.data;
+}
+
+/**
+ * Create webhook endpoint via POST /v1/webhooks/endpoints
+ */
+export async function createWebhookEndpoint(
+  dto: CreateWebhookEndpointRequest
+): Promise<{ id: string }> {
+  const token = getCurrentToken();
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  const response = await apiClient.post<{ id: string }>('/v1/webhooks/endpoints', dto);
+  return response.data;
+}
+
+/**
+ * Delete webhook endpoint via DELETE /v1/webhooks/endpoints/:id
+ */
+export async function deleteWebhookEndpoint(id: string): Promise<void> {
+  const token = getCurrentToken();
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  await apiClient.delete(`/v1/webhooks/endpoints/${id}`);
+}
+
+/**
+ * Test webhook via POST /v1/webhooks/test
+ * Note: Currently sends to all endpoints for the organization.
+ * Backend needs update to support per-endpoint testing via endpointId parameter.
+ */
+export async function testWebhook(
+  endpointId: string,
+  eventType?: string
+): Promise<{ message: string }> {
+  const token = getCurrentToken();
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  // Backend currently only accepts eventType, sends to all endpoints
+  const response = await apiClient.post<{ message: string }>('/v1/webhooks/test', {
+    eventType: eventType || 'message.sent',
+  });
   return response.data;
 }
 

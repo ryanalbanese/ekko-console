@@ -172,4 +172,58 @@ export interface Conversation {
   lastUpdated: string;
 }
 
+export type StoredMessage = {
+  messageId: string;
+  conversationId: string;
+  timestamp: number;
+  chosenChannel: string;
+  lastKnownStatus?: "queued" | "sent" | "delivered" | "failed";
+  source?: string;
+};
+
+// Webhook Types
+export interface WebhookEndpoint {
+  id: string;
+  url: string;
+  eventTypes: string[];
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface CreateWebhookEndpointRequest {
+  url: string;
+  eventTypes: string[];
+  secret?: string;
+}
+
+// Channel Capabilities Types
+export interface ChannelCapability {
+  channel: 'secure_email' | 'sms' | 'xmpp' | 'ai' | string;
+  name: string;
+  supportsThreading: boolean;
+  supportsAttachments: boolean;
+  maxRecipients: number;
+  rateLimit: {
+    perMinute: number;
+  };
+}
+
+export interface EkkoChannelsResponse {
+  capabilities: ChannelCapability[];
+  capabilities_version: string;
+  generated_at: string;
+}
+
+// Event Entry for Live Events Panel
+export interface EventEntry {
+  id: string;
+  timestamp: number;
+  eventType: string;
+  messageId?: string;
+  conversationId?: string;
+  status: 'queued' | 'sent' | 'delivered' | 'failed' | 'unknown';
+  chosenChannel?: string;
+  source: 'websocket';
+  payload?: unknown; // For future extensibility, not rendered
+}
 
