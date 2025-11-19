@@ -1,7 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { EkkoSocketProvider } from './contexts/EkkoSocketContext';
 import './index.css';
+
+// Initialize theme from localStorage or default to dark
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light') {
+  document.documentElement.classList.remove('dark');
+} else if (savedTheme === 'dark' || !savedTheme) {
+  document.documentElement.classList.add('dark');
+}
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {
@@ -19,7 +29,11 @@ if ('serviceWorker' in navigator) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <EkkoSocketProvider>
+        <App />
+      </EkkoSocketProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

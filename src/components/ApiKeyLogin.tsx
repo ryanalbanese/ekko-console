@@ -17,10 +17,17 @@ export function ApiKeyLogin() {
       return;
     }
 
+    // Validate API key format
+    const trimmedKey = apiKey.trim();
+    if (!trimmedKey.startsWith('ekko_')) {
+      setError('Invalid API key format. API keys must start with "ekko_" (e.g., ekko_test_xxxxx)');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      setToken(apiKey.trim());
+      setToken(trimmedKey);
       if (displayName.trim()) {
         setIdentityLabel(displayName.trim());
       }

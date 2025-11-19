@@ -41,6 +41,14 @@ export function useEkkoSocket(): UseEkkoSocketReturn {
       return;
     }
 
+    // Validate that the token looks like an API key (starts with "ekko_")
+    if (!token.startsWith('ekko_')) {
+      console.error('[useEkkoSocket] Invalid API key format. API keys should start with "ekko_". Please check your API key or clear localStorage and re-enter it.');
+      setIsReady(false);
+      setIsConnected(false);
+      return;
+    }
+
     // Disconnect existing socket if any
     if (socketRef.current) {
       socketRef.current.disconnect();
@@ -51,10 +59,13 @@ export function useEkkoSocket(): UseEkkoSocketReturn {
 
     const socket = io(wsOrigin, {
       auth: {
-        token,
+        apiKey: token, // Backend expects apiKey in auth object
       },
       transports: ['websocket'],
       timeout: 8000,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: Infinity,
     });
 
     socketRef.current = socket;
@@ -69,7 +80,11 @@ export function useEkkoSocket(): UseEkkoSocketReturn {
     });
 
     socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
+      console.error('[useEkkoSocket] WebSocket connection error:', error);
+      // If it's an authentication error, log a helpful message
+      if (error.message?.includes('Invalid API key') || error.message?.includes('Unauthorized')) {
+        console.error('[useEkkoSocket] Authentication failed. Please check that your API key is correct and starts with "ekko_". If you have an old JWT token stored, clear localStorage and re-enter your API key.');
+      }
       setIsConnected(false);
     });
 

@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect, FormEvent, ChangeEvent } from 'react';
-import { sendMessage } from '../utils/apiClient';
-import { useEkkoSocketContext } from '../contexts/EkkoSocketContext';
-import type { Attachment, Message } from '../types/api';
-import { PromptInput } from './PromptInput';
+import { Paperclip, Send, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { sendMessage } from '../../utils/apiClient';
+import { useEkkoSocketContext } from '../../contexts/EkkoSocketContext';
+import type { Attachment, Message } from '../../types/api';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
 
 interface MessageInputProps {
   addMessage: (message: Omit<Message, 'timestamp' | 'status'>) => void;
@@ -16,10 +22,20 @@ export function MessageInput({ addMessage, conversationId }: MessageInputProps) 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<number | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { emitTypingStart, emitTypingStop, isConnected } = useEkkoSocketContext();
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [text]);
 
   // Debounced typing detection
   useEffect(() => {
@@ -122,7 +138,8 @@ export function MessageInput({ addMessage, conversationId }: MessageInputProps) 
     }
 
     if (!recipient.trim()) {
-      setError('Recipient email is required');
+      setError('Recipient email is required. Please expand "Show recipient & subject" to enter it.');
+      setShowAdvanced(true);
       return;
     }
 
@@ -142,7 +159,6 @@ export function MessageInput({ addMessage, conversationId }: MessageInputProps) 
       };
       
       const messageText = text.trim() || '(No message text)';
-      // For now, always use text (plain text). Can add HTML support later if needed.
       content.text = messageText;
 
       // Build conversation object if we have a conversationId
@@ -188,72 +204,143 @@ export function MessageInput({ addMessage, conversationId }: MessageInputProps) 
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (text.trim() && !isSending && isConnected) {
+        handleSubmit();
+      }
+    }
+  };
+
   return (
-    <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="max-w-3xl mx-auto px-4 py-4">
         {error && (
-          <div className="mb-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-2 rounded text-sm">
+          <div className="mb-3 p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg">
             {error}
           </div>
         )}
 
         {attachments.length > 0 && (
-          <div className="mb-2 flex flex-wrap gap-2">
+          <div className="mb-3 flex flex-wrap gap-2">
             {attachments.map((attachment, index) => (
-              <div
+              <Badge
                 key={index}
-                className="relative inline-block border border-gray-300 dark:border-gray-600 rounded p-2 bg-gray-50 dark:bg-gray-700"
+                variant="secondary"
+                className="gap-1.5 pr-1"
               >
                 {attachment.preview ? (
                   <img
                     src={attachment.preview}
                     alt={attachment.metadata.filename}
-                    className="h-20 w-auto rounded"
+                    className="h-6 w-auto rounded"
                   />
                 ) : (
-                  <div className="text-sm text-gray-700 dark:text-gray-300">
-                    {attachment.metadata.filename}
-                  </div>
+                  <span className="text-xs">{attachment.metadata.filename}</span>
                 )}
                 <button
                   type="button"
                   onClick={() => removeAttachment(index)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                  className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
                 >
-                  ×
+                  <X className="h-3 w-3" />
                 </button>
-              </div>
+              </Badge>
             ))}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-2">
-          <div className="flex gap-2">
-            <input
-              type="email"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="Recipient email"
-              required
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Subject (optional)"
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+          <CollapsibleTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mb-2 text-xs"
+            >
+              {showAdvanced ? (
+                <>
+                  <ChevronUp className="h-3 w-3 mr-1" />
+                  Hide advanced
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-3 w-3 mr-1" />
+                  Show recipient & subject
+                </>
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 mb-3">
+            <div className="space-y-2">
+              <Label htmlFor="recipient" className="text-xs">
+                Recipient
+              </Label>
+              <Input
+                id="recipient"
+                type="email"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="recipient@example.com"
+                required
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subject" className="text-xs">
+                Subject (optional)
+              </Label>
+              <Input
+                id="subject"
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Message subject"
+                className="h-9"
+              />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
-          <PromptInput
-            value={text}
-            onChange={setText}
-            onSend={() => handleSubmit()}
-            onAttach={() => fileInputRef.current?.click()}
-            placeholder="Type your message..."
-            disabled={isSending || !isConnected}
-          />
+        <form onSubmit={handleSubmit} className="relative">
+          <div className="relative flex items-end gap-2 rounded-2xl border bg-background p-2 shadow-sm">
+            <Textarea
+              ref={textareaRef}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Send a message via Ekko..."
+              disabled={isSending || !isConnected}
+              className="min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent px-3 py-2.5 text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+              rows={1}
+            />
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isSending || !isConnected}
+                className="h-9 w-9 rounded-full"
+                aria-label="Attach file"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Button
+                type="submit"
+                size="icon"
+                disabled={isSending || !isConnected || (!text.trim() && attachments.length === 0)}
+                className="h-9 w-9 rounded-full"
+                aria-label="Send message"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-center text-muted-foreground">
+            Press Enter to send, Shift+Enter for new line
+          </p>
         </form>
 
         <input

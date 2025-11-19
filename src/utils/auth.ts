@@ -23,11 +23,24 @@ export function getCurrentToken(): string | null {
       console.error('Demo mode enabled but VITE_EKKO_AUTH_TOKEN is not set');
       return null;
     }
+    // Validate demo token format
+    if (!DEMO_TOKEN.startsWith('ekko_')) {
+      console.error('Demo token does not start with "ekko_". Please check VITE_EKKO_AUTH_TOKEN environment variable.');
+      return null;
+    }
     return DEMO_TOKEN;
   }
 
   // Real mode: get from localStorage
   const token = localStorage.getItem(STORAGE_KEY_TOKEN);
+  if (token && !token.startsWith('ekko_')) {
+    // Invalid token format - likely an old JWT token
+    console.warn('Invalid token format detected. Clearing old token. Please re-enter your API key.');
+    localStorage.removeItem(STORAGE_KEY_TOKEN);
+    localStorage.removeItem(STORAGE_KEY_IDENTITY);
+    notifyTokenChange();
+    return null;
+  }
   return token || null;
 }
 
