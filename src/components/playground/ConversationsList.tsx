@@ -54,15 +54,6 @@ export function ConversationsList({
 
   return (
     <div className="flex h-full w-[280px] flex-col border-r bg-muted/30">
-      <div className="p-4 border-b">
-        <Button
-          onClick={() => setDialogOpen(true)}
-          className="w-full"
-          size="sm"
-        >
-          New conversation
-        </Button>
-      </div>
 
       {conversations.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">

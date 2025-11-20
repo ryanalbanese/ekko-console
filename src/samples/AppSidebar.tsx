@@ -13,17 +13,11 @@
 import * as React from "react"
 import { Link, useLocation } from "react-router-dom"
 import {
-  Activity,
-  AppWindow,
   BookOpen,
-  Code2,
   KeyRound,
   LifeBuoy,
   MessageSquare,
-  ScrollText,
-  Settings2,
   Share2,
-  ShieldCheck,
   SquareTerminal,
   Webhook,
   type LucideIcon,
@@ -91,47 +85,9 @@ const navSections: NavSection[] = [
         icon: KeyRound,
       },
       {
-        title: "Client Apps (Soon)",
-        url: "/client-apps",
-        icon: AppWindow,
-        soon: true,
-      },
-      {
-        title: "SDK & Examples",
-        url: "/sdk-examples",
-        icon: Code2,
-      },
-    ],
-  },
-  {
-    label: "Monitoring",
-    items: [
-      {
-        title: "Delivery Logs",
-        url: "/delivery-logs",
-        icon: ScrollText,
-      },
-      {
-        title: "System Health (Soon)",
-        url: "/system-health",
-        icon: Activity,
-        soon: true,
-      },
-    ],
-  },
-  {
-    label: "Organization",
-    items: [
-      {
-        title: "Project Settings",
-        url: "/project-settings",
-        icon: Settings2,
-      },
-      {
-        title: "Compliance & Audit (Soon)",
-        url: "/compliance",
-        icon: ShieldCheck,
-        soon: true,
+        title: "Docs",
+        url: "/docs",
+        icon: BookOpen,
       },
     ],
   },

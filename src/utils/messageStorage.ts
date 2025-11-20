@@ -12,7 +12,7 @@ export function storeMessage(meta: StoredMessage): void {
     const existingIndex = stored.findIndex((m) => m.messageId === meta.messageId);
     
     if (existingIndex >= 0) {
-      // Update existing message
+      // Update existing message (merge with existing data)
       stored[existingIndex] = { ...stored[existingIndex], ...meta };
     } else {
       // Add new message
@@ -20,6 +20,9 @@ export function storeMessage(meta: StoredMessage): void {
     }
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+    
+    // Dispatch custom event to notify listeners
+    window.dispatchEvent(new CustomEvent('ekko:messages-updated'));
   } catch (error) {
     console.error('Failed to store message:', error);
   }
@@ -54,7 +57,12 @@ export function updateMessageStatus(
     
     if (message) {
       message.lastKnownStatus = status;
+      // Update timestamp when status changes
+      message.timestamp = Date.now();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+      
+      // Dispatch custom event to notify listeners
+      window.dispatchEvent(new CustomEvent('ekko:messages-updated'));
     }
   } catch (error) {
     console.error('Failed to update message status:', error);

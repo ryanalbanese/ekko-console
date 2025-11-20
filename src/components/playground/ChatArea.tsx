@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Empty } from '@/components/ui/empty';
 import { Badge } from '@/components/ui/badge';
@@ -27,14 +28,57 @@ interface ChatAreaProps {
 
 export function ChatArea({ messages, activeConversationId, onClearMessages }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<React.ElementRef<typeof ScrollArea>>(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const previousMessagesLengthRef = useRef(messages.length);
+
+  const checkIfNearBottom = (): boolean => {
+    if (!scrollAreaRef.current) return true;
+    
+    // Find the viewport element inside the ScrollArea
+    const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+    if (!viewport) return true;
+
+    const { scrollTop, scrollHeight, clientHeight } = viewport;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    
+    // Consider "near bottom" if within 100px
+    return distanceFromBottom <= 100;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Handle scroll events to detect if user manually scrolled up
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (!scrollAreaRef.current) return;
+
+    const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+    if (!viewport) return;
+
+    const handleScroll = () => {
+      setShouldAutoScroll(checkIfNearBottom());
+    };
+
+    viewport.addEventListener('scroll', handleScroll);
+    return () => {
+      viewport.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // Auto-scroll when new messages arrive (only if user is near bottom)
+  useEffect(() => {
+    const hasNewMessages = messages.length > previousMessagesLengthRef.current;
+    previousMessagesLengthRef.current = messages.length;
+
+    if (hasNewMessages && shouldAutoScroll) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [messages, shouldAutoScroll]);
 
   const getStatusBadge = (status: Message['status']) => {
     if (status === 'pending') return null;
@@ -105,7 +149,7 @@ export function ChatArea({ messages, activeConversationId, onClearMessages }: Ch
           </AlertDialog>
         </div>
       )}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" ref={scrollAreaRef}>
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
           {messages.map((message, index) => (
             <div

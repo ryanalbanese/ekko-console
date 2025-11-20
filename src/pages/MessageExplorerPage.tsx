@@ -50,6 +50,18 @@ export function MessageExplorerPage() {
     loadMessages();
   }, []);
 
+  // Listen for custom events when messages are updated
+  useEffect(() => {
+    const handleMessagesUpdated = () => {
+      loadMessages();
+    };
+
+    window.addEventListener('ekko:messages-updated', handleMessagesUpdated);
+    return () => {
+      window.removeEventListener('ekko:messages-updated', handleMessagesUpdated);
+    };
+  }, []);
+
   const loadMessages = () => {
     const stored = getStoredMessages();
     setMessages(stored);

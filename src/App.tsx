@@ -8,7 +8,17 @@ import { PlaygroundPage } from './pages/PlaygroundPage';
 import { MessageExplorerPage } from './pages/MessageExplorerPage';
 import { EventsPage } from './pages/EventsPage';
 import { ChannelsPage } from './pages/ChannelsPage';
+import { ApiKeysPage } from './pages/ApiKeysPage';
+import { DocsPage } from './pages/DocsPage';
 import { Toaster } from '@/components/ui/sonner';
+import { useMessageEventHandler } from './hooks/useMessageEventHandler';
+
+// Component that mounts the message event handler at top level
+// This handles messageStorage updates even when not on playground page
+function MessageEventHandler() {
+  useMessageEventHandler();
+  return null;
+}
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
@@ -50,11 +60,15 @@ function App() {
 
   return (
     <>
+      {/* Mount message event handler once at top level */}
+      <MessageEventHandler />
       <Routes>
         <Route path="/playground" element={<PlaygroundPage />} />
         <Route path="/messages" element={<MessageExplorerPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/channels" element={<ChannelsPage />} />
+        <Route path="/api-keys" element={<ApiKeysPage />} />
+        <Route path="/docs" element={<DocsPage />} />
         <Route path="*" element={
           <AppLayout>
             <SidebarDashboard />
