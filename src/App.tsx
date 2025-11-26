@@ -64,6 +64,7 @@ function App() {
       <MessageEventHandler />
       <Routes>
         <Route path="/playground" element={<PlaygroundPage />} />
+        <Route path="/messages/:messageId" element={<MessageExplorerPage />} />
         <Route path="/messages" element={<MessageExplorerPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/channels" element={<ChannelsPage />} />

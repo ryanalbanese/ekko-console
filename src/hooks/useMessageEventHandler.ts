@@ -192,7 +192,7 @@ export function useMessageEventHandler(): void {
               body: 'Message sent via Ekko API',
               status: event.status,
               timestamp: event.timestamp,
-              isLocal: false,
+              isLocal: true, // All messages in Playground are outgoing (sent by Ekko identity)
               recipients: [],
               ...(event.error && { error: event.error }),
             };
@@ -251,7 +251,7 @@ export function useMessageEventHandler(): void {
             })),
             status: (content.status || event.status) as Message['status'],
             timestamp: content.sentAt || content.deliveredAt || event.timestamp,
-            isLocal: false,
+            isLocal: true, // All messages in Playground are outgoing (sent by Ekko identity)
             ...(event.error && { error: event.error }),
             ...(event.isRetryable !== undefined && { isRetryable: event.isRetryable }),
           };
@@ -304,7 +304,7 @@ export function useMessageEventHandler(): void {
               body: 'Message sent via Ekko API',
               status: event.status,
               timestamp: event.timestamp,
-              isLocal: false,
+              isLocal: true, // All messages in Playground are outgoing (sent by Ekko identity)
               recipients: [],
               ...(event.error && { error: event.error }),
             };

@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Copy, Pause, Play, Trash2 } from 'lucide-react';
+import { Copy, Pause, Play, Trash2, Check } from 'lucide-react';
 import type { MessageEvent, EventEntry } from '@/types/api';
-import { toast } from 'sonner';
 import {
   Tooltip,
   TooltipContent,
@@ -77,6 +76,7 @@ export const LiveEventsPanel = forwardRef<LiveEventsPanelRef, LiveEventsPanelPro
   const { isConnected, isReady, events } = useEkkoSocketContext();
   const [eventEntries, setEventEntries] = useState<EventEntry[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
   const processedEventIdsRef = useRef<Set<string>>(new Set());
@@ -193,9 +193,16 @@ export const LiveEventsPanel = forwardRef<LiveEventsPanelRef, LiveEventsPanelPro
     shouldAutoScrollRef.current = true;
   };
 
-  const handleCopyMessageId = (messageId: string) => {
-    navigator.clipboard.writeText(messageId);
-    toast.success('Message ID copied to clipboard');
+  const handleCopyMessageId = async (messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(messageId);
+      setCopiedMessageId(messageId);
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
   };
 
   const handleScroll = () => {
@@ -312,13 +319,18 @@ export const LiveEventsPanel = forwardRef<LiveEventsPanelRef, LiveEventsPanelPro
                             onClick={() => handleCopyMessageId(entry.messageId!)}
                             className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground"
                           >
-                            <Copy className="h-3 w-3" />
+                            {copiedMessageId === entry.messageId ? (
+                              <Check className="h-3 w-3" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
                             {entry.messageId.substring(0, 8)}...
                           </button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{entry.messageId}</p>
-                          <p className="text-xs">Click to copy</p>
+                        <TooltipContent className="max-w-lg">
+                          <p className="font-mono text-xs break-all whitespace-normal">
+                            {entry.messageId}
+                          </p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ekko-ui-sample-v1';
+const CACHE_NAME = 'ekko-console-v1';
 const urlsToCache = [
   '/',
   '/index.html',

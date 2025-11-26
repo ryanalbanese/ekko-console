@@ -1,4 +1,4 @@
-# Ekko UI Sample
+# Ekko Console
 
 A full-featured 2-way ChatGPT-style PWA client for the Ekko messaging API. This sample application demonstrates real-time messaging between multiple users with WebSocket events, REST polling, typing indicators, attachments, and push notifications.
 
@@ -25,7 +25,7 @@ A full-featured 2-way ChatGPT-style PWA client for the Ekko messaging API. This 
 
 ```bash
 # Clone the repository
-cd ekko-ui-sample
+cd ekko-console
 
 # Install dependencies
 npm install
@@ -184,7 +184,7 @@ When you type in the message input, the app automatically:
 ## Project Structure
 
 ```
-ekko-ui-sample/
+ekko-console/
 ├── src/
 │   ├── components/          # React components
 │   │   ├── ApiKeyLogin.tsx  # API key entry screen

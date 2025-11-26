@@ -26,23 +26,13 @@ export function NewConversationDialog({
   const [label, setLabel] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
     const trimmedRecipient = recipientAddress.trim();
     if (!trimmedRecipient) {
-      setError('Recipient email is required');
-      return;
-    }
-
-    if (!validateEmail(trimmedRecipient)) {
-      setError('Please enter a valid email address');
+      setError('Recipient address is required');
       return;
     }
 
@@ -66,22 +56,22 @@ export function NewConversationDialog({
         <DialogHeader>
           <DialogTitle>New Conversation</DialogTitle>
           <DialogDescription>
-            Create a new conversation with a recipient. All messages in this conversation will be sent to this address.
+            Create a new conversation with a recipient.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="recipient">Recipient email *</Label>
+              <Label htmlFor="recipient">Who are you sending to? *</Label>
               <Input
                 id="recipient"
-                type="email"
+                type="text"
                 value={recipientAddress}
                 onChange={(e) => {
                   setRecipientAddress(e.target.value);
                   setError(null);
                 }}
-                placeholder="recipient@example.com"
+                placeholder="e.g., user@example.com, +1234567890, user@domain.com/resource"
                 required
               />
               {error && (

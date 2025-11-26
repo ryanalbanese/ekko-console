@@ -37,7 +37,7 @@ export function PlaygroundComposer({
 }: PlaygroundComposerProps) {
   const [text, setText] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [channel, setChannel] = useState<'auto' | 'direct' | 'sms' | 'instant' | 'push'>('auto');
+  const [channel, setChannel] = useState<'auto' | 'secure_email' | 'sms' | 'xmpp' | 'ai'>('auto');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const canSend = activeConversationId && recipientAddress && text.trim() && isConnected && !isSending;
@@ -123,7 +123,7 @@ export function PlaygroundComposer({
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask, Search or Chat..."
+              placeholder="Send a message..."
               disabled={!activeConversationId || isSending}
               className="flex field-sizing-content min-h-16 w-full resize-none rounded-none border-0 bg-transparent px-3 py-3 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
             />
@@ -158,21 +158,23 @@ export function PlaygroundComposer({
                   <DropdownMenuItem onSelect={() => setChannel('auto')}>
                     Auto
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setChannel('direct')}>
-                    Direct
+                  <DropdownMenuItem onSelect={() => setChannel('secure_email')}>
+                    Secure Email
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => setChannel('sms')}>
                     SMS
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setChannel('instant')}>
-                    Instant
+                  <DropdownMenuItem onSelect={() => setChannel('xmpp')}>
+                    XMPP
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setChannel('push')}>
-                    Push
+                  <DropdownMenuItem onSelect={() => setChannel('ai')}>
+                    AI
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <InputGroupText className="ml-auto">52% used</InputGroupText>
+              {recipientAddress && (
+                <InputGroupText className="ml-auto">Sending to {recipientAddress}</InputGroupText>
+              )}
               <Separator orientation="vertical" className="!h-4" />
               <InputGroupButton
                 variant="default"

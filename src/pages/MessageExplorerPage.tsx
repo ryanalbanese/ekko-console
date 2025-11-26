@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,7 +28,7 @@ import {
 } from '@/utils/messageStorage';
 import { getMessageById } from '@/utils/apiClient';
 import type { StoredMessage } from '@/types/api';
-import { RefreshCw, Trash2, Copy, ArrowUpDown, Clock, Send, CheckCircle2, XCircle } from 'lucide-react';
+import { RefreshCw, Trash2, Copy, ArrowUpDown, Clock, Send, CheckCircle2, XCircle, Check } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -40,11 +40,14 @@ type SortField = 'timestamp' | 'status';
 type SortDirection = 'asc' | 'desc';
 
 export function MessageExplorerPage() {
+  const { messageId: urlMessageId } = useParams<{ messageId?: string }>();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<StoredMessage[]>([]);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sortField, setSortField] = useState<SortField>('timestamp');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   useEffect(() => {
     loadMessages();
@@ -61,6 +64,34 @@ export function MessageExplorerPage() {
       window.removeEventListener('ekko:messages-updated', handleMessagesUpdated);
     };
   }, []);
+
+  // Handle URL messageId parameter - sync selectedMessageId with URL
+  useEffect(() => {
+    if (urlMessageId) {
+      // URL has a messageId - try to find and select it
+      if (messages.length > 0) {
+        const message = messages.find((msg) => msg.messageId === urlMessageId);
+        if (message) {
+          // Message found, select it if not already selected
+          if (selectedMessageId !== urlMessageId) {
+            setSelectedMessageId(urlMessageId);
+          }
+        } else {
+          // Message not found in current list, clear selection and navigate back
+          if (selectedMessageId === urlMessageId) {
+            setSelectedMessageId(null);
+            navigate('/messages', { replace: true });
+          }
+        }
+      }
+      // If messages.length === 0, wait for messages to load (effect will run again)
+    } else {
+      // URL doesn't have messageId - clear selection if it exists
+      if (selectedMessageId) {
+        setSelectedMessageId(null);
+      }
+    }
+  }, [urlMessageId, messages, selectedMessageId, navigate]);
 
   const loadMessages = () => {
     const stored = getStoredMessages();
@@ -174,8 +205,16 @@ export function MessageExplorerPage() {
     return `${id.substring(0, length)}...`;
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
   };
 
   const headerContent = (
@@ -280,7 +319,9 @@ export function MessageExplorerPage() {
                         <TableRow
                           key={message.messageId}
                           className="cursor-pointer"
-                          onClick={() => setSelectedMessageId(message.messageId)}
+                          onClick={() => {
+                            navigate(`/messages/${encodeURIComponent(message.messageId)}`);
+                          }}
                         >
                           <TableCell className="font-mono text-xs">
                             {formatTimestamp(message.timestamp)}
@@ -299,14 +340,18 @@ export function MessageExplorerPage() {
                                       className="h-6 w-6 flex-shrink-0"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        copyToClipboard(message.messageId);
+                                        copyToClipboard(message.messageId, message.messageId);
                                       }}
                                     >
-                                      <Copy className="h-3 w-3" />
+                                      {copiedMessageId === message.messageId ? (
+                                        <Check className="h-3 w-3" />
+                                      ) : (
+                                        <Copy className="h-3 w-3" />
+                                      )}
                                     </Button>
                                   </div>
                                 </TooltipTrigger>
-                                <TooltipContent className="max-w-md">
+                                <TooltipContent className="max-w-lg">
                                   <p className="font-mono text-xs break-all whitespace-normal">
                                     {message.messageId}
                                   </p>
@@ -366,6 +411,7 @@ export function MessageExplorerPage() {
           onOpenChange={(open) => {
             if (!open) {
               setSelectedMessageId(null);
+              navigate('/messages', { replace: true });
             }
           }}
         />

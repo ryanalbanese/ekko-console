@@ -34,7 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Copy, RotateCw, X } from 'lucide-react';
+import { Copy, RotateCw, X, Check } from 'lucide-react';
 
 interface ApiKey {
   id: string;
@@ -47,6 +47,7 @@ interface ApiKey {
 
 export function ApiKeysPage() {
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
 
   // Read API keys from environment variables
   const apiKeys = useMemo<ApiKey[]>(() => {
@@ -95,8 +96,16 @@ export function ApiKeysPage() {
     return `${prefix}****${last8}`;
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string, keyId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKeyId(keyId);
+      setTimeout(() => {
+        setCopiedKeyId(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
   };
 
   const formatTimestamp = (date: Date): string => {
@@ -181,9 +190,13 @@ export function ApiKeysPage() {
                                       variant="ghost"
                                       size="icon"
                                       className="h-6 w-6 flex-shrink-0"
-                                      onClick={() => copyToClipboard(apiKey.key)}
+                                      onClick={() => copyToClipboard(apiKey.key, apiKey.id)}
                                     >
-                                      <Copy className="h-3 w-3" />
+                                      {copiedKeyId === apiKey.id ? (
+                                        <Check className="h-3 w-3" />
+                                      ) : (
+                                        <Copy className="h-3 w-3" />
+                                      )}
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>

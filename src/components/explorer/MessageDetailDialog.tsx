@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Copy, X, Clock, Send, CheckCircle2, XCircle } from 'lucide-react';
+import { Copy, X, Clock, Send, CheckCircle2, XCircle, Check } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,7 @@ export function MessageDetailDialog({
   const [contentData, setContentData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (open && messageId) {
@@ -65,8 +66,16 @@ export function MessageDetailDialog({
     }
   }, [open, messageId]);
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
   };
 
   const getStatusConfig = (status?: string) => {
@@ -124,7 +133,7 @@ export function MessageDetailDialog({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 mt-4">
                 <span className="truncate font-mono text-sm">{messageId}</span>
                 <Button
                   variant="ghost"
@@ -132,7 +141,11 @@ export function MessageDetailDialog({
                   className="h-6 w-6"
                   onClick={() => copyToClipboard(messageId)}
                 >
-                  <Copy className="h-3 w-3" />
+                  {copied ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
                 </Button>
               </DialogTitle>
               <DialogDescription className="flex items-center gap-2 mt-2">
@@ -209,15 +222,17 @@ export function MessageDetailDialog({
 
             <TabsContent value="content" className="flex-1 overflow-auto mt-4">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    {contentData.subject || '(No subject)'}
-                  </CardTitle>
-                </CardHeader>
+                {contentData.subject && (
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      {contentData.subject}
+                    </CardTitle>
+                  </CardHeader>
+                )}
                 <CardContent className="space-y-4">
                   {contentData.textBody && (
                     <div>
-                      <h4 className="font-medium mb-2">Text Body</h4>
+                      <h4 className="font-medium mb-2 pt-4">Message Content</h4>
                       <div className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
                         {contentData.textBody}
                       </div>
@@ -257,12 +272,7 @@ export function MessageDetailDialog({
                       <ul className="space-y-1">
                         {contentData.to.map((recipient: any, index: number) => (
                           <li key={index} className="text-sm">
-                            {recipient.email}
-                            {recipient.type && (
-                              <Badge variant="outline" className="ml-2">
-                                {recipient.type}
-                              </Badge>
-                            )}
+                            {recipient.email}                            
                           </li>
                         ))}
                       </ul>
