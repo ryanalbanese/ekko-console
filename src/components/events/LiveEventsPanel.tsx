@@ -158,8 +158,10 @@ export const LiveEventsPanel = forwardRef<LiveEventsPanelRef, LiveEventsPanelPro
   }, [eventEntries, isPaused]);
 
   const handlePauseToggle = (checked: boolean) => {
-    setIsPaused(checked);
-    if (!checked) {
+    // When switch is checked (on), we want Live mode (isPaused = false)
+    // When switch is unchecked (off), we want Paused mode (isPaused = true)
+    setIsPaused(!checked);
+    if (checked) {
       // When unpausing, add buffered events and jump to latest
       if (bufferedEventsRef.current.length > 0) {
         setEventEntries((prev) => {
@@ -269,7 +271,7 @@ export const LiveEventsPanel = forwardRef<LiveEventsPanelRef, LiveEventsPanelPro
               {isPaused ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               <Switch
                 id="pause-events"
-                checked={isPaused}
+                checked={!isPaused}
                 onCheckedChange={handlePauseToggle}
               />
               <Label htmlFor="pause-events" className="text-sm text-muted-foreground">

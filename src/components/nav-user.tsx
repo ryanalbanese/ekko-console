@@ -4,7 +4,6 @@ import {
   BadgeCheck,
   Bell,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -28,6 +27,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons"
+import { clearAllStorage } from "@/utils/auth"
 
 export function NavUser({
   user,
@@ -40,10 +40,22 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
 
+  const handleLogout = (e?: Event) => {
+    console.log('Logout handler called', e)
+    // Clear storage (may be no-op in demo mode, but that's OK)
+    clearAllStorage()
+    // Always redirect to login page, even in demo mode
+    // Use setTimeout to ensure this executes after the dropdown closes
+    setTimeout(() => {
+      console.log('Redirecting to login page')
+      window.location.href = '/'
+    }, 100)
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -81,13 +93,6 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
@@ -101,10 +106,23 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem 
+                onSelect={(e) => {
+                  console.log('Logout onSelect fired', e, typeof e)
+                  handleLogout(e as any)
+                }}
+                onClick={(e) => {
+                  console.log('Logout onClick fired', e, typeof e)
+                }}
+                onPointerDown={(e) => {
+                  console.log('Logout onPointerDown fired', e, typeof e)
+                }}
+              >
+                <LogOut />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

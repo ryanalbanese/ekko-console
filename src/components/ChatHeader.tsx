@@ -34,12 +34,9 @@ export function ChatHeader({ isConnected }: ChatHeaderProps) {
   };
 
   useEffect(() => {
-    // Check for saved theme preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-      setIsDark(true);
-    }
+    // Force light mode - always remove dark class
+    document.documentElement.classList.remove('dark');
+    setIsDark(false);
   }, []);
 
   return (

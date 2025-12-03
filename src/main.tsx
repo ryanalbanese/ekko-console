@@ -5,13 +5,9 @@ import App from './App';
 import { EkkoSocketProvider } from './contexts/EkkoSocketContext';
 import './index.css';
 
-// Initialize theme from localStorage or default to dark
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'light') {
-  document.documentElement.classList.remove('dark');
-} else if (savedTheme === 'dark' || !savedTheme) {
-  document.documentElement.classList.add('dark');
-}
+// Force light mode
+document.documentElement.classList.remove('dark');
+localStorage.setItem('theme', 'light');
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {

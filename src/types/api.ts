@@ -81,7 +81,6 @@ export interface MessageSentEvent {
   conversationId: string;
   chosenChannel: string;
   timestamp: string;
-  providerId: string;
   requestId: string;
 }
 
@@ -90,7 +89,6 @@ export interface MessageDeliveredEvent {
   conversationId: string;
   chosenChannel: string;
   timestamp: string;
-  providerId: string;
   requestId: string;
 }
 
@@ -157,6 +155,7 @@ export interface Message {
   body: string;
   subject?: string;
   sender?: string;
+  from?: string | { address: string; name?: string };
   recipients: RecipientDto[];
   status: MessageStatus;
   timestamp: string;
@@ -225,5 +224,33 @@ export interface EventEntry {
   chosenChannel?: string;
   source: 'websocket';
   payload?: unknown; // For future extensibility, not rendered
+}
+
+// Bootstrap Types
+export interface BootstrapIdentity {
+  address: string;
+  name?: string;
+}
+
+export interface BootstrapResponse {
+  orgId: string;
+  projectId: string;
+  channels: Array<{
+    channel: string;
+    name: string;
+    supportsThreading?: boolean;
+    supportsAttachments?: boolean;
+    maxRecipients?: number;
+    rateLimit?: {
+      perMinute?: number;
+      perHour?: number;
+    };
+  }>;
+  identities: {
+    from: BootstrapIdentity[];
+    to: BootstrapIdentity[];
+  };
+  defaultFrom?: BootstrapIdentity;
+  defaultTo?: BootstrapIdentity;
 }
 

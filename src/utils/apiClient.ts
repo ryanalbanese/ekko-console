@@ -6,6 +6,7 @@ import type {
   WebhookEndpoint,
   CreateWebhookEndpointRequest,
   EkkoChannelsResponse,
+  BootstrapResponse,
 } from '../types/api';
 
 const API_URL = import.meta.env.VITE_EKKO_API_URL || 'http://localhost:8080';
@@ -110,6 +111,32 @@ export async function getMessageChannels(): Promise<EkkoChannelsResponse> {
   }
 
   const response = await apiClient.get<EkkoChannelsResponse>('/v1/message/channels');
+  return response.data;
+}
+
+/**
+ * Get bootstrap data via GET /v1/console/bootstrap
+ * PHI-free endpoint that returns project configuration, channels, and demo identities
+ * @param token Optional token to use. If not provided, will use getCurrentToken()
+ */
+export async function getBootstrapData(token?: string): Promise<BootstrapResponse> {
+  const authToken = token || getCurrentToken();
+  if (!authToken) {
+    throw new Error('No authentication token available');
+  }
+
+  // Create a one-time axios instance with the provided token if needed
+  const client = token 
+    ? axios.create({
+        baseURL: API_URL,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+    : apiClient;
+
+  const response = await client.get<BootstrapResponse>('/v1/console/bootstrap');
   return response.data;
 }
 

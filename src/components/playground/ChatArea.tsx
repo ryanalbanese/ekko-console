@@ -8,6 +8,7 @@ import { formatTime } from '@/utils/time';
 import type { Message } from '@/types/api';
 import { cn } from '@/lib/utils';
 import { Trash2 } from 'lucide-react';
+import { getSelectedIdentity } from '@/utils/auth';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,6 +81,45 @@ export function ChatArea({ messages, activeConversationId, onClearMessages }: Ch
     }
   }, [messages, shouldAutoScroll]);
 
+  /**
+   * Normalize address for comparison: lowercase, trim whitespace
+   */
+  const normalizeAddress = (address: string | undefined | null): string => {
+    if (!address) return '';
+    return address.toLowerCase().trim();
+  };
+
+  /**
+   * Determine if message should be shown on right (outbound) or left (inbound)
+   * Explicit bubble-side rule: Compare normalized lowercase selectedIdentity.address
+   * to normalized message.from(.address) with legacy string fallback
+   */
+  const isOutboundMessage = (message: Message): boolean => {
+    const selectedIdentity = getSelectedIdentity();
+    if (!selectedIdentity) {
+      // Fallback to isLocal if no identity selected
+      return message.isLocal || false;
+    }
+
+    const selectedAddress = normalizeAddress(selectedIdentity.address);
+    
+    // Get message.from - handle both string and object formats
+    let messageFrom: string | undefined;
+    if (typeof message.from === 'string') {
+      messageFrom = message.from;
+    } else if (message.from && typeof message.from === 'object' && 'address' in message.from) {
+      messageFrom = (message.from as { address: string }).address;
+    } else if (message.sender) {
+      // Legacy fallback: use message.sender
+      messageFrom = message.sender;
+    }
+
+    const normalizedFrom = normalizeAddress(messageFrom);
+    
+    // If normalized addresses match: show on right (outbound)
+    return selectedAddress === normalizedFrom && selectedAddress !== '';
+  };
+
   const getStatusBadge = (status: Message['status']) => {
     if (status === 'pending') return null;
 
@@ -151,19 +191,21 @@ export function ChatArea({ messages, activeConversationId, onClearMessages }: Ch
       )}
       <ScrollArea className="flex-1" ref={scrollAreaRef}>
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-          {messages.map((message, index) => (
+          {messages.map((message, index) => {
+            const isOutbound = isOutboundMessage(message);
+            return (
             <div
               key={`${message.messageId}-${index}`}
               className={cn(
                 'flex',
-                message.isLocal ? 'justify-end' : 'justify-start'
+                isOutbound ? 'justify-end' : 'justify-start'
               )}
             >
               <div className="flex flex-col max-w-[80%]">
                 <div
                   className={cn(
                     'rounded-2xl px-4 py-3 shadow-sm',
-                    message.isLocal
+                    isOutbound
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-foreground'
                   )}
@@ -182,7 +224,7 @@ export function ChatArea({ messages, activeConversationId, onClearMessages }: Ch
                     </div>
                   )}
                 </div>
-                {message.isLocal && (
+                {isOutbound && (
                   <div className="flex items-center justify-end gap-2 mt-1 text-xs text-muted-foreground">
                     <span>{formatTime(message.timestamp)}</span>
                     {getStatusBadge(message.status)}
@@ -190,7 +232,7 @@ export function ChatArea({ messages, activeConversationId, onClearMessages }: Ch
                 )}
               </div>
             </div>
-          ))}
+          )})}
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>

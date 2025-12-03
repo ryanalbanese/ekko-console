@@ -4,7 +4,6 @@ import {
   BadgeCheck,
   Bell,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -28,6 +27,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons"
+import { clearAllStorage } from "@/utils/auth"
 
 export function NavUser({
   user,
@@ -40,10 +40,38 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
 
+  // Generate initials from user's name
+  const getInitials = (name: string): string => {
+    if (!name) return 'U'
+    const parts = name.trim().split(/\s+/)
+    if (parts.length >= 2) {
+      // First letter of first name + first letter of last name
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    } else if (parts.length === 1) {
+      // Single name: use first two letters
+      return parts[0].substring(0, 2).toUpperCase()
+    }
+    return 'U'
+  }
+
+  const initials = getInitials(user.name)
+
+  const handleLogout = () => {
+    console.log('Logout handler called')
+    // Clear storage (may be no-op in demo mode, but that's OK)
+    clearAllStorage()
+    // Always redirect to login page, even in demo mode
+    // Use setTimeout to ensure this executes after the dropdown closes
+    setTimeout(() => {
+      console.log('Redirecting to login page')
+      window.location.href = '/'
+    }, 100)
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -51,7 +79,7 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
@@ -70,7 +98,7 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>
@@ -78,13 +106,6 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
@@ -101,10 +122,17 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem 
+                onSelect={(e) => {
+                  console.log('Logout onSelect fired', e)
+                  handleLogout()
+                }}
+              >
+                <LogOut />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

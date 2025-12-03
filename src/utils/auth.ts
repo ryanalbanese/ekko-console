@@ -9,6 +9,7 @@ const DEMO_IDENTITY = import.meta.env.VITE_EKKO_IDENTITY_LABEL;
 
 const STORAGE_KEY_TOKEN = 'ekkoApiKey';
 const STORAGE_KEY_IDENTITY = 'ekkoIdentityLabel';
+const STORAGE_KEY_BOOTSTRAP = 'ekkoBootstrap';
 
 // Token change listeners for reactive updates
 const tokenChangeListeners = new Set<() => void>();
@@ -32,15 +33,8 @@ export function getCurrentToken(): string | null {
   }
 
   // Real mode: get from localStorage
+  // Removed client-side ekko_ prefix validation (let backend validate)
   const token = localStorage.getItem(STORAGE_KEY_TOKEN);
-  if (token && !token.startsWith('ekko_')) {
-    // Invalid token format - likely an old JWT token
-    console.warn('Invalid token format detected. Clearing old token. Please re-enter your API key.');
-    localStorage.removeItem(STORAGE_KEY_TOKEN);
-    localStorage.removeItem(STORAGE_KEY_IDENTITY);
-    notifyTokenChange();
-    return null;
-  }
   return token || null;
 }
 
@@ -125,6 +119,126 @@ function notifyTokenChange(): void {
  */
 export function hasToken(): boolean {
   return getCurrentToken() !== null;
+}
+
+/**
+ * Bootstrap data storage functions
+ */
+import type { BootstrapResponse, BootstrapIdentity } from '../types/api';
+
+const STORAGE_KEY_SELECTED_IDENTITY = 'ekkoSelectedIdentity';
+
+/**
+ * Store bootstrap data in localStorage
+ */
+export function setBootstrapData(data: BootstrapResponse): void {
+  if (DEMO_MODE) {
+    console.warn('Cannot set bootstrap data in demo mode.');
+    return;
+  }
+
+  try {
+    localStorage.setItem(STORAGE_KEY_BOOTSTRAP, JSON.stringify(data));
+    
+    // Preselect defaultFrom if present, else first identity
+    const selectedIdentity = data.defaultFrom || data.identities.from[0];
+    if (selectedIdentity) {
+      setSelectedIdentity(selectedIdentity);
+    }
+  } catch (error) {
+    console.error('Failed to store bootstrap data:', error);
+  }
+}
+
+/**
+ * Get bootstrap data from localStorage
+ */
+export function getBootstrapData(): BootstrapResponse | null {
+  if (DEMO_MODE) {
+    return null;
+  }
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_BOOTSTRAP);
+    if (!stored) {
+      return null;
+    }
+    return JSON.parse(stored) as BootstrapResponse;
+  } catch (error) {
+    console.error('Failed to parse bootstrap data:', error);
+    return null;
+  }
+}
+
+/**
+ * Clear bootstrap data from localStorage
+ */
+export function clearBootstrapData(): void {
+  if (DEMO_MODE) {
+    console.warn('Cannot clear bootstrap data in demo mode.');
+    return;
+  }
+
+  localStorage.removeItem(STORAGE_KEY_BOOTSTRAP);
+  localStorage.removeItem(STORAGE_KEY_SELECTED_IDENTITY);
+}
+
+/**
+ * Clear all storage (token, identity, bootstrap) - used when bootstrap is missing/corrupt
+ */
+export function clearAllStorage(): void {
+  if (DEMO_MODE) {
+    console.warn('Cannot clear storage in demo mode.');
+    return;
+  }
+
+  clearToken();
+  clearBootstrapData();
+}
+
+/**
+ * Get selected identity from localStorage
+ */
+export function getSelectedIdentity(): BootstrapIdentity | null {
+  if (DEMO_MODE) {
+    return null;
+  }
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_SELECTED_IDENTITY);
+    if (!stored) {
+      // Fallback to bootstrap defaultFrom or first identity
+      const bootstrap = getBootstrapData();
+      if (bootstrap) {
+        const identity = bootstrap.defaultFrom || bootstrap.identities.from[0];
+        if (identity) {
+          setSelectedIdentity(identity);
+          return identity;
+        }
+      }
+      return null;
+    }
+    return JSON.parse(stored) as BootstrapIdentity;
+  } catch (error) {
+    console.error('Failed to parse selected identity:', error);
+    return null;
+  }
+}
+
+/**
+ * Set selected identity in localStorage
+ */
+export function setSelectedIdentity(identity: BootstrapIdentity): void {
+  if (DEMO_MODE) {
+    console.warn('Cannot set selected identity in demo mode.');
+    return;
+  }
+
+  try {
+    localStorage.setItem(STORAGE_KEY_SELECTED_IDENTITY, JSON.stringify(identity));
+  } catch (error) {
+    console.error('Failed to store selected identity:', error);
+  }
 }
 
 

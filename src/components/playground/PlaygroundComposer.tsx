@@ -18,6 +18,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { sendMessage } from '@/utils/apiClient';
 import { storeMessage } from '@/utils/messageStorage';
+import { getSelectedIdentity } from '@/utils/auth';
 import type { Message } from '@/types/api';
 
 interface PlaygroundComposerProps {
@@ -57,8 +58,15 @@ export function PlaygroundComposer({
       // Generate a unique request ID to avoid idempotency collisions
       const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
+      // Use selected identity as default from address
+      const selectedIdentity = getSelectedIdentity();
+      const fromAddress = selectedIdentity
+        ? { address: selectedIdentity.address, name: selectedIdentity.name }
+        : undefined;
+      
       const response = await sendMessage({
         to: [{ address: recipientAddress }],
+        from: fromAddress,
         channel: channel,
         content: { text: text.trim() },
         metadata: {
@@ -76,6 +84,7 @@ export function PlaygroundComposer({
         status: 'queued',
         timestamp: new Date().toISOString(),
         isLocal: true,
+        from: fromAddress, // Set from field so message is recognized as outbound
       };
 
       // Store message metadata in localStorage
@@ -119,13 +128,13 @@ export function PlaygroundComposer({
           <InputGroup>
             <TextareaAutosize
               ref={textareaRef}
-              data-slot="input-group-control"
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Send a message..."
               disabled={!activeConversationId || isSending}
               className="flex field-sizing-content min-h-16 w-full resize-none rounded-none border-0 bg-transparent px-3 py-3 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
+              data-slot="input-group-control"
             />
             <InputGroupAddon align="block-end">
               <InputGroupButton

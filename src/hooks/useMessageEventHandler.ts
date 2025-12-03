@@ -28,6 +28,7 @@ export function useMessageEventHandler(): void {
   const events = useMessageEvents();
   const playgroundHandlers = usePlaygroundHandlersContext();
   const processedEventIdsRef = useRef<Set<string>>(new Set());
+  const processedMessageIdsRef = useRef<Set<string>>(new Set()); // Track processed messageIds for 'sent' events
   const fetchingMessageIdsRef = useRef<Set<string>>(new Set()); // Track in-flight fetches
 
   useEffect(() => {
@@ -38,6 +39,20 @@ export function useMessageEventHandler(): void {
       // Skip if already processed in this handler
       if (processedEventIdsRef.current.has(eventId)) {
         return;
+      }
+
+      // For 'sent' events, check if we've already processed a 'sent' event for this messageId
+      // This prevents duplicate processing when status check emits a second 'sent' event
+      // Check BEFORE processing to prevent race conditions
+      if (event.status === 'sent') {
+        if (processedMessageIdsRef.current.has(event.messageId)) {
+          console.log('[useMessageEventHandler] Skipping duplicate sent event for messageId:', event.messageId);
+          // Still mark the eventId as processed to avoid reprocessing
+          processedEventIdsRef.current.add(eventId);
+          return;
+        }
+        // Mark as processed immediately to prevent race conditions
+        processedMessageIdsRef.current.add(event.messageId);
       }
 
       processedEventIdsRef.current.add(eventId);
@@ -98,10 +113,81 @@ export function useMessageEventHandler(): void {
         return;
       }
 
+      // Check if message already exists in conversation - if so, just update status and skip fetch
+      const existingConversation = conversations.find((c) => c.id === event.conversationId);
+      if (existingConversation) {
+        const conversationMessages = messagesByConversation?.[event.conversationId] || [];
+        
+        // First, check if message exists with exact messageId match
+        let existingMessage = conversationMessages.find((m) => m.messageId === event.messageId);
+        
+        // If not found, check for a recently added "queued" message in the same conversation
+        // This handles the case where optimistic message has temporary messageId but event has final messageId
+        if (!existingMessage && event.status === 'sent') {
+          // Find the most recent "queued" message in this conversation (likely the optimistic one)
+          const queuedMessages = conversationMessages
+            .filter((m) => m.status === 'queued' && m.isLocal)
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+          
+          if (queuedMessages.length > 0) {
+            // Check if the most recent queued message was added recently (within 10 seconds)
+            const mostRecentQueued = queuedMessages[0];
+            const messageTime = new Date(mostRecentQueued.timestamp).getTime();
+            const eventTime = new Date(event.timestamp).getTime();
+            const timeDiff = Math.abs(eventTime - messageTime);
+            
+            if (timeDiff < 10000) { // 10 seconds
+              // This is likely the same message - update it instead of adding a new one
+              console.log('[useMessageEventHandler] Found matching queued message, updating to sent:', {
+                conversationId: event.conversationId,
+                queuedMessageId: mostRecentQueued.messageId,
+                eventMessageId: event.messageId,
+                timeDiff,
+              });
+              
+              // Update status first
+              updatePlaygroundStatus(event.conversationId, mostRecentQueued.messageId, event.status, event.error);
+              
+              // If messageIds are different, we need to update the messageId too
+              // We'll do this by removing the old message and adding a new one with the correct messageId
+              // But first, let's mark this messageId as processed so we don't add it again
+              processedMessageIdsRef.current.add(event.messageId);
+              
+              // Update stored message with final messageId
+              const storedMessages = getStoredMessages();
+              const storedMsg = storedMessages.find((m) => m.messageId === mostRecentQueued.messageId);
+              if (storedMsg && storedMsg.messageId !== event.messageId) {
+                // Remove old stored message and add new one with final messageId
+                const updatedStored = storedMessages.filter((m) => m.messageId !== mostRecentQueued.messageId);
+                updatedStored.push({
+                  ...storedMsg,
+                  messageId: event.messageId,
+                  lastKnownStatus: event.status,
+                });
+                localStorage.setItem('ekko:messages', JSON.stringify(updatedStored));
+              }
+              
+              // Don't fetch content - we already have the message, just needed to update status/messageId
+              return;
+            }
+          }
+        }
+        
+        if (existingMessage) {
+          // Message already exists - just update status, don't fetch content again
+          console.log('[useMessageEventHandler] Message already exists, updating status:', {
+            conversationId: event.conversationId,
+            messageId: event.messageId,
+            status: event.status,
+          });
+          updatePlaygroundStatus(event.conversationId, event.messageId, event.status, event.error);
+          return;
+        }
+      }
+
       // Check if we're already fetching this message (avoid duplicate API calls)
       if (fetchingMessageIdsRef.current.has(event.messageId)) {
         // If message already exists in a conversation, just update its status
-        const existingConversation = conversations.find((c) => c.id === event.conversationId);
         if (existingConversation) {
           const conversationMessages = messagesByConversation?.[event.conversationId] || [];
           const messageExists = conversationMessages.some((m) => m.messageId === event.messageId);
@@ -224,9 +310,10 @@ export function useMessageEventHandler(): void {
           }
         }
 
-        // Check if message already exists in conversation (using captured state)
-        const conversationMessages = currentMessagesByConversation?.[finalConversationId] || [];
-        const messageExists = conversationMessages.some((m) => m.messageId === event.messageId);
+        // Check if message already exists in conversation (use latest state, not captured)
+        // This is important because the optimistic message might have been added after we captured state
+        const latestMessages = messagesByConversation?.[finalConversationId] || [];
+        const messageExists = latestMessages.some((m) => m.messageId === event.messageId);
 
         if (messageExists) {
           // Message exists - just update status
@@ -236,6 +323,7 @@ export function useMessageEventHandler(): void {
             status: event.status,
           });
           updatePlaygroundStatus(finalConversationId, event.messageId, event.status, event.error);
+          fetchingMessageIdsRef.current.delete(event.messageId);
         } else {
           // Create message from content
           const messageBody = content.textBody || content.htmlBody || '';

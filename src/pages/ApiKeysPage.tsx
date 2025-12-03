@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Breadcrumb,
@@ -35,6 +35,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Copy, RotateCw, X, Check } from 'lucide-react';
+import { getCurrentToken } from '@/utils/auth';
 
 interface ApiKey {
   id: string;
@@ -48,37 +49,39 @@ interface ApiKey {
 export function ApiKeysPage() {
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
-  // Read API keys from environment variables
-  const apiKeys = useMemo<ApiKey[]>(() => {
-    const keys: ApiKey[] = [];
-    const key1 = import.meta.env.VITE_EKKO_API_KEY_1;
-    const key2 = import.meta.env.VITE_EKKO_API_KEY_2;
-
-    if (key1) {
-      keys.push({
-        id: '1',
-        key: key1,
-        type: 'Test Key',
-        created: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-        lastUsed: 'Playground',
-        status: 'active',
-      });
-    }
-
-    if (key2) {
-      keys.push({
-        id: '2',
-        key: key2,
-        type: 'Test Key',
-        created: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-        lastUsed: 'WebSocket',
-        status: 'active',
-      });
-    }
-
-    return keys;
+  // Get the logged-in user's API key
+  useEffect(() => {
+    const token = getCurrentToken();
+    setApiKey(token);
   }, []);
+
+  // Create API keys array from the logged-in user's key
+  const apiKeys = useMemo<ApiKey[]>(() => {
+    if (!apiKey) {
+      return [];
+    }
+
+    // Determine key type based on prefix
+    let keyType = 'API Key';
+    if (apiKey.startsWith('ekko_test_')) {
+      keyType = 'Test Key';
+    } else if (apiKey.startsWith('ekko_live_')) {
+      keyType = 'Live Key';
+    }
+
+    return [
+      {
+        id: 'current',
+        key: apiKey,
+        type: keyType,
+        created: new Date(), // We don't have creation date, use current date
+        lastUsed: 'Active',
+        status: 'active',
+      },
+    ];
+  }, [apiKey]);
 
   const maskKey = (key: string): string => {
     if (key.length <= 12) return '****' + key.slice(-8);

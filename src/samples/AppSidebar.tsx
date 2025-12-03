@@ -22,6 +22,7 @@ import {
   Webhook,
   type LucideIcon,
 } from "lucide-react"
+import { getBootstrapData } from "@/utils/auth"
 
 import { NavUser } from "./NavUser"
 import {
@@ -97,12 +98,6 @@ const bottomLinks: NavItem[] = [
   
 ]
 
-const user = {
-  name: "Ekko Demo",
-  email: "demo@getekko.io",
-  avatar: "/avatars/shadcn.jpg",
-}
-
 function renderLabel(item: NavItem) {
   if (!item.soon) {
     return <span className="truncate">{item.title}</span>
@@ -123,6 +118,37 @@ function renderLabel(item: NavItem) {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
   const pathname = location.pathname
+
+  // Get user info from bootstrap data
+  const [userName, setUserName] = React.useState<string>("User")
+  const [userEmail, setUserEmail] = React.useState<string>("demo@getekko.io")
+  
+  React.useEffect(() => {
+    const bootstrap = getBootstrapData()
+    if (bootstrap) {
+      // Use defaultFrom identity, or first identity as fallback
+      const identity = bootstrap.defaultFrom || bootstrap.identities.from[0]
+      if (identity) {
+        if (identity.address) {
+          setUserEmail(identity.address)
+        }
+        // Use identity name if available, otherwise derive from email
+        if (identity.name) {
+          setUserName(identity.name)
+        } else if (identity.address) {
+          // Fallback: use email username (part before @) as name
+          const emailUsername = identity.address.split('@')[0]
+          setUserName(emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1))
+        }
+      }
+    }
+  }, [])
+
+  const user = {
+    name: userName,
+    email: userEmail,
+    avatar: "/avatars/shadcn.jpg",
+  }
 
   const isPathActive = React.useCallback(
     (url: string) => {

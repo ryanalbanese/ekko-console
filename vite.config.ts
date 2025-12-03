@@ -13,7 +13,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
       },
       manifest: {
-        name: "Ekko UI Sample",
+        name: "Ekko Console",
         short_name: "Ekko",
         description: "Sample UI for Ekko messaging API",
         theme_color: "#ffffff",

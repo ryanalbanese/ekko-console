@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { isDemoMode, hasToken, onTokenChange, getCurrentToken } from './utils/auth';
+import { isDemoMode, hasToken, onTokenChange, getCurrentToken, getBootstrapData, clearAllStorage } from './utils/auth';
 import { ApiKeyLogin } from './components/ApiKeyLogin';
 import { AppLayout } from './components/layout/AppLayout';
 import { SidebarDashboard } from '@/samples/SidebarDashboard';
@@ -29,15 +29,16 @@ function App() {
       const demo = isDemoMode();
       const token = getCurrentToken();
       
-      // If we have a token but it's invalid format, clear it
-      if (token && !token.startsWith('ekko_')) {
-        console.warn('Invalid token format detected. Clearing and showing login.');
-        if (!demo) {
-          localStorage.removeItem('ekkoApiKey');
-          localStorage.removeItem('ekkoIdentityLabel');
+      // If apiKey exists but bootstrap missing/corrupt, clear storage and redirect to login
+      // Only check this if we're not already showing login (to avoid clearing during login flow)
+      if (token && !demo && !showLogin) {
+        const bootstrap = getBootstrapData();
+        if (!bootstrap) {
+          console.warn('API key exists but bootstrap data is missing or corrupt. Clearing storage and redirecting to login.');
+          clearAllStorage();
+          setShowLogin(true);
+          return;
         }
-        setShowLogin(true);
-        return;
       }
       
       const hasAuth = hasToken();

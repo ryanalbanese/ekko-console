@@ -1,5 +1,5 @@
 {
-  "name": "Ekko UI Sample",
+  "name": "Ekko Console",
   "short_name": "Ekko",
   "description": "Sample UI for Ekko messaging API - Real-time messaging with WebSocket support",
   "start_url": "/",

@@ -107,13 +107,13 @@
     @apply bg-background text-foreground;
   }
   
-  /* Default to dark mode */
+  /* Force light mode */
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
   
   html {
-    @apply dark;
+    /* Light mode - dark class removed */
   }
 }
 

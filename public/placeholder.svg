@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200px" height="1200px" viewBox="0 0 1200 1200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>placeholder</title>
+    <defs>
+        <linearGradient x1="100.086708%" y1="50.0004216%" x2="-0.0867081782%" y2="50.0004229%" id="linearGradient-1">
+            <stop stop-color="#C9C9C9" stop-opacity="0" offset="0%"></stop>
+            <stop stop-color="#C9C9C9" offset="20.8%"></stop>
+            <stop stop-color="#C9C9C9" offset="79.2%"></stop>
+            <stop stop-color="#C9C9C9" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="100.086795%" y1="50.000842%" x2="-0.0865400816%" y2="50.0008433%" id="linearGradient-2">
+            <stop stop-color="#C9C9C9" stop-opacity="0" offset="0%"></stop>
+            <stop stop-color="#C9C9C9" offset="20.8%"></stop>
+            <stop stop-color="#C9C9C9" offset="79.2%"></stop>
+            <stop stop-color="#C9C9C9" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50.000842%" y1="-0.0867955836%" x2="50.0008433%" y2="100.086796%" id="linearGradient-3">
+            <stop stop-color="#C9C9C9" stop-opacity="0" offset="0%"></stop>
+            <stop stop-color="#C9C9C9" offset="20.8%"></stop>
+            <stop stop-color="#C9C9C9" offset="79.2%"></stop>
+            <stop stop-color="#C9C9C9" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="0.14663768%" y1="-0.32035561%" x2="100.32061%" y2="99.8525955%" id="linearGradient-4">
+            <stop stop-color="#C9C9C9" stop-opacity="0" offset="0%"></stop>
+            <stop stop-color="#C9C9C9" offset="20.8%"></stop>
+            <stop stop-color="#C9C9C9" offset="79.2%"></stop>
+            <stop stop-color="#C9C9C9" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="placeholder" stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+        <g id="Group">
+            <rect id="Rectangle" fill="#EAEAEA" fill-rule="nonzero" x="0" y="0" width="1200" height="1200" rx="3"></rect>
+            <g opacity="0.5">
+                <g id="Path">
+                    <path d="M600.709,736.5 C525.255,736.5 464.088,675.333 464.088,599.88 C464.088,524.426 525.255,463.259 600.709,463.259 C676.162,463.259 737.329,524.426 737.329,599.88 C737.329,675.333 676.162,736.5 600.709,736.5 Z" fill="#FAFAFA" fill-rule="nonzero"></path>
+                    <path d="M600.709,736.5 C525.255,736.5 464.088,675.333 464.088,599.88 C464.088,524.426 525.255,463.259 600.709,463.259 C676.162,463.259 737.329,524.426 737.329,599.88 C737.329,675.333 676.162,736.5 600.709,736.5 Z" stroke="#C9C9C9" stroke-width="2.418"></path>
+                </g>
+                <line x1="324.915253" y1="600.875811" x2="878.496253" y2="600.875811" id="Path" stroke="url(#linearGradient-1)" stroke-width="2.418" transform="translate(601.7058, 600.8758) scale(-1, 1) rotate(-135) translate(-601.7058, -600.8758)"></line>
+                <line x1="404.846" y1="598.671" x2="796.572" y2="598.671" id="Path" stroke="url(#linearGradient-2)" stroke-width="2.418"></line>
+                <line x1="599.5" y1="795.742" x2="599.5" y2="404.017" id="Path" stroke="url(#linearGradient-3)" stroke-width="2.418"></line>
+                <line x1="795.717" y1="796.597" x2="404.276" y2="405.157" id="Path" stroke="url(#linearGradient-4)" stroke-width="2.418"></line>
+                <path d="M600.709,656.704 C569.325,656.704 543.884,631.263 543.884,599.88 C543.884,568.496 569.325,543.055 600.709,543.055 C632.092,543.055 657.533,568.496 657.533,599.88 C657.533,631.263 632.092,656.704 600.709,656.704 Z" id="Path" fill="#FFFFFF" fill-rule="nonzero"></path>
+                <g fill="#666666" id="Shape">
+                    <path d="M616.426,586.58 L584.992,586.58 L584.992,602.756 L588.545,599.202 L589.076,598.671 L598.144,598.671 L598.218,598.597 L606.681,590.134 L609.246,590.134 L616.426,597.315 L616.426,586.58 L616.426,586.58 Z M600.711,601.234 L604.409,604.933 L605.692,606.215 L603.127,608.78 L601.845,607.497 L596.645,602.298 L590.579,602.298 L585.065,607.812 L584.992,607.885 L584.992,610.761 C584.992,612.096425 586.074575,613.179 587.41,613.179 L614.008,613.179 C615.343425,613.179 616.426,612.096425 616.426,610.761 L616.426,602.444 L607.963,593.981 L600.782,601.162 L600.711,601.234 L600.711,601.234 Z M581.364,606.676 L581.364,610.761 C581.364,612.364407 582.001019,613.902128 583.134893,615.035814 C584.268767,616.1695 585.806593,616.806 587.41,616.806 L614.008,616.806 C615.611315,616.806 617.149039,616.169468 618.282753,615.035753 C619.416468,613.902039 620.053265,612.364315 620.053,610.761 L620.053,603.653 L621.409,602.298 L620.127,601.015 L620.053,600.942 L620.053,582.953 L581.364,582.953 L581.364,606.383 L581.218,606.529 L581.364,606.676 L581.364,606.676 Z"></path>
+                </g>
+                <path d="M600.709,656.704 C569.325,656.704 543.884,631.263 543.884,599.88 C543.884,568.496 569.325,543.055 600.709,543.055 C632.092,543.055 657.533,568.496 657.533,599.88 C657.533,631.263 632.092,656.704 600.709,656.704 Z" id="Path" stroke="#C9C9C9" stroke-width="2.418"></path>
+            </g>
+        </g>
+    </g>
+</svg>
