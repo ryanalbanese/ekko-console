@@ -1,18 +1,18 @@
 # Ekko Console
 
-A full-featured 2-way ChatGPT-style PWA client for the Ekko messaging API. This sample application demonstrates real-time messaging between multiple users with WebSocket events, REST polling, typing indicators, attachments, and push notifications.
+A full-featured 2-way PWA client for the Ekko messaging API. This sample application demonstrates real-time messaging between multiple users with WebSocket events, REST polling, typing indicators, attachments, and push notifications.
 
 ## Features
 
-- 🚀 **Real-time Messaging**: WebSocket-based real-time message delivery and status updates
-- 💬 **Two-way Chat**: ChatGPT-inspired UI with message bubbles and smooth animations
-- 🔐 **Dual Auth Mode**: Demo mode (env token) or real mode (user-entered API key)
-- ⌨️ **Typing Indicators**: Real-time typing status with debounced events
-- 📎 **File Attachments**: Support for file uploads with image previews
-- 🔍 **Message Inspector**: REST API polling panel for message lookup
-- 📱 **PWA Support**: Installable app with service worker and push notifications
-- 🌓 **Dark Mode**: Automatic dark/light mode with system preference detection
-- 📊 **Status Tracking**: Real-time message status (queued → sent → delivered/failed)
+- **Real-time Messaging**: WebSocket-based real-time message delivery and status updates
+- **Two-way Chat**: UI with message bubbles and smooth animations
+- **Dual Auth Mode**: Demo mode (env token) or real mode (user-entered API key)
+- **Typing Indicators**: Real-time typing status with debounced events
+- **File Attachments**: Support for file uploads with image previews
+- **Message Inspector**: REST API polling panel for message lookup
+- **PWA Support**: Installable app with service worker and push notifications
+- **Dark Mode**: Automatic dark/light mode with system preference detection
+- **Status Tracking**: Real-time message status (queued → sent → delivered/failed)
 
 ## Quick Start
 
@@ -169,7 +169,7 @@ When you type in the message input, the app automatically:
 
 ### Attachments
 
-- Click the 📎 button to select files
+- Click the attachment button to select files
 - Images show previews before sending
 - Other files show filename and size
 - Attachments are base64-encoded and sent with the message
@@ -257,14 +257,6 @@ npm run preview
 # Lint code
 npm run lint
 ```
-
-## Screenshots
-
-<!-- Add screenshots here -->
-- [Screenshot: Chat Interface]
-- [Screenshot: Message Inspector]
-- [Screenshot: API Key Login]
-- [Screenshot: Dark Mode]
 
 ## Troubleshooting
 
