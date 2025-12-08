@@ -4,15 +4,15 @@ A full-featured 2-way ChatGPT-style PWA client for the Ekko messaging API. This 
 
 ## Features
 
-- 🚀 **Real-time Messaging**: WebSocket-based real-time message delivery and status updates
-- 💬 **Two-way Chat**: ChatGPT-inspired UI with message bubbles and smooth animations
-- 🔐 **Dual Auth Mode**: Demo mode (env token) or real mode (user-entered API key)
-- ⌨️ **Typing Indicators**: Real-time typing status with debounced events
-- 📎 **File Attachments**: Support for file uploads with image previews
-- 🔍 **Message Inspector**: REST API polling panel for message lookup
-- 📱 **PWA Support**: Installable app with service worker and push notifications
-- 🌓 **Dark Mode**: Automatic dark/light mode with system preference detection
-- 📊 **Status Tracking**: Real-time message status (queued → sent → delivered/failed)
+- **Real-time Messaging**: WebSocket-based real-time message delivery and status updates
+- **Two-way Chat**: ChatGPT-inspired UI with message bubbles and smooth animations
+- **Dual Auth Mode**: Demo mode (env token) or real mode (user-entered API key)
+- **Typing Indicators**: Real-time typing status with debounced events
+- **File Attachments**: Support for file uploads with image previews
+- **Message Inspector**: REST API polling panel for message lookup
+- **PWA Support**: Installable app with service worker and push notifications
+- **Dark Mode**: Automatic dark/light mode with system preference detection
+- **Status Tracking**: Real-time message status (queued → sent → delivered/failed)
 
 ## Quick Start
 
