@@ -31,4 +31,7 @@ dist-ssr
 # Vite
 .vite
 
+# Cursor AI files (NEVER commit these)
+.cursor/
+
 
