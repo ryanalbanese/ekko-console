@@ -1,11 +1,11 @@
 # Ekko Console
 
-A full-featured 2-way ChatGPT-style PWA client for the Ekko messaging API. This sample application demonstrates real-time messaging between multiple users with WebSocket events, REST polling, typing indicators, attachments, and push notifications.
+A full-featured 2-way chat PWA client for the Ekko messaging API. This sample application demonstrates real-time messaging between multiple users with WebSocket events, REST polling, typing indicators, attachments, and push notifications.
 
 ## Features
 
 - **Real-time Messaging**: WebSocket-based real-time message delivery and status updates
-- **Two-way Chat**: ChatGPT-inspired UI with message bubbles and smooth animations
+- **Two-way Chat**: Chat UI with message bubbles and smooth animations
 - **Dual Auth Mode**: Demo mode (env token) or real mode (user-entered API key)
 - **Typing Indicators**: Real-time typing status with debounced events
 - **File Attachments**: Support for file uploads with image previews
